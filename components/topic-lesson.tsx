@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import {
   ArrowLeft,
   ArrowRight,
@@ -88,7 +87,7 @@ export function TopicLesson({
     <main className="topic-page" style={{ "--stage-color": stage.color } as React.CSSProperties}>
       <div className="topic-sky" aria-hidden="true" />
       <header className="topic-topbar">
-        <Link href={`/#stage-${stage.id}`}><ArrowLeft size={16} /> 返回学习星图</Link>
+        <a href={`/#stage-${stage.id}`}><ArrowLeft size={16} /> 返回学习星图</a>
         <span><Orbit size={18} /> C++ 星航图</span>
         <div className="topic-actions">
           <Button variant="outline" onClick={() => toggle("favoriteIds")}>
@@ -206,8 +205,8 @@ export function TopicLesson({
           <section className="career-note topic-career"><span>与就业的连接</span><p>{node.career}</p></section>
 
           <nav className="topic-pagination" aria-label="相邻知识点">
-            {previous ? <Link href={`/topic/${previous.id}`}><ArrowLeft size={17} /><span><small>上一节</small>{previous.title}</span></Link> : <span />}
-            {next ? <Link href={`/topic/${next.id}`}><span><small>下一节</small>{next.title}</span><ArrowRight size={17} /></Link> : <Link href="/"><span><small>完成路线</small>返回学习星图</span><Orbit size={17} /></Link>}
+            {previous ? <a href={`/topic/${previous.id}`}><ArrowLeft size={17} /><span><small>上一节</small>{previous.title}</span></a> : <span />}
+            {next ? <a href={`/topic/${next.id}`}><span><small>下一节</small>{next.title}</span><ArrowRight size={17} /></a> : <a href="/"><span><small>完成路线</small>返回学习星图</span><Orbit size={17} /></a>}
           </nav>
         </article>
       </div>
