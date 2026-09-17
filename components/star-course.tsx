@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import {
   ArrowRight,
   Bookmark,
@@ -355,11 +354,11 @@ export function StarCourse() {
                       {favoriteIds.has(selected.id) ? "已收藏" : "收藏"}
                     </Button>
                   </div>
-                  <Link className="deep-dive-link" href={`/topic/${selected.id}`}>
+                  <a className="deep-dive-link" href={`/topic/${selected.id}`}>
                     <BookOpen size={17} />
                     进入完整专题页
                     <ArrowRight size={15} />
-                  </Link>
+                  </a>
                 </SheetHeader>
 
                 <div className="lesson-body">
