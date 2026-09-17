@@ -7,12 +7,15 @@ import {
   ArrowRight,
   Bookmark,
   BookmarkCheck,
+  BriefcaseBusiness,
   CheckCircle2,
   CircleDot,
   Compass,
   FlaskConical,
   Lightbulb,
+  ListChecks,
   Orbit,
+  Route,
   ShieldAlert,
   Telescope,
 } from "lucide-react";
@@ -27,6 +30,7 @@ import {
   type LearningStage,
 } from "@/lib/course-data";
 import type { DeepDive } from "@/lib/deep-dives";
+import type { TopicExpansion } from "@/lib/topic-expansions";
 
 function loadProgress(): LearningProgress {
   try {
@@ -43,12 +47,14 @@ export function TopicLesson({
   node,
   stage,
   deepDive,
+  expansion,
   previous,
   next,
 }: {
   node: KnowledgeNode;
   stage: LearningStage;
   deepDive: DeepDive;
+  expansion: TopicExpansion;
   previous?: KnowledgeNode;
   next?: KnowledgeNode;
 }) {
@@ -102,8 +108,10 @@ export function TopicLesson({
             <a href="#mental-model">核心模型</a>
             <a href="#mechanism">底层机制</a>
             <a href="#code">代码实验</a>
-            <a href="#boundaries">边界与陷阱</a>
+            <a href="#engineering">工程现场</a>
+            <a href="#boundaries">陷阱拆解</a>
             <a href="#practice">动手验证</a>
+            <a href="#further">扩展路线</a>
           </nav>
         </aside>
 
@@ -142,21 +150,56 @@ export function TopicLesson({
             <p>{node.example.explanation}</p>
           </section>
 
+          <section id="engineering" className="topic-section">
+            <span className="topic-kicker">04 / IN PRACTICE</span>
+            <h2>它在真实工程中解决什么</h2>
+            <div className="use-case-grid">
+              {expansion.useCases.map(([title, description]) => (
+                <article className="use-case-card" key={title}>
+                  <BriefcaseBusiness size={21} />
+                  <div><h3>{title}</h3><p>{description}</p></div>
+                </article>
+              ))}
+            </div>
+          </section>
+
           <section id="boundaries" className="topic-section">
-            <span className="topic-kicker">04 / BOUNDARIES</span>
-            <h2>边界条件与常见陷阱</h2>
+            <span className="topic-kicker">05 / BOUNDARIES</span>
+            <h2>不仅要知道错了，还要知道为什么</h2>
             <div className="boundary-card"><ShieldAlert size={22} /><p>{deepDive.boundary}</p></div>
-            <ul className="pitfall-list">{node.pitfalls.map((pitfall) => <li key={pitfall}>{pitfall}</li>)}</ul>
+            <div className="pitfall-explanations">
+              {node.pitfalls.map((pitfall, index) => (
+                <article key={pitfall}>
+                  <span>常见错误 {String(index + 1).padStart(2, "0")}</span>
+                  <h3>{pitfall}</h3>
+                  <p>{expansion.pitfallAnalysis[index]}</p>
+                </article>
+              ))}
+            </div>
             <div className="interview-card"><Lightbulb size={20} /><div><span>面试观测站</span><p>{node.interviewTip}</p></div></div>
           </section>
 
           <section id="practice" className="topic-section">
-            <span className="topic-kicker">05 / VERIFY IT</span>
+            <span className="topic-kicker">06 / VERIFY IT</span>
             <h2>不要只记结论，亲手验证</h2>
             <div className="verify-card"><FlaskConical size={22} /><p>{deepDive.verify}</p></div>
             <div className="topic-exercise">
               <Compass size={22} />
               <div><h3>练习任务</h3><p>{node.exercise.prompt}</p><button type="button" onClick={() => setShowHint((value) => !value)}>{showHint ? "收起提示" : "查看提示"}</button>{showHint && <small>{node.exercise.hint}</small>}</div>
+            </div>
+            <div className="mastery-card">
+              <div><ListChecks size={22} /><h3>掌握检查清单</h3></div>
+              <ul>{expansion.mastery.map((item) => <li key={item}>{item}</li>)}</ul>
+            </div>
+          </section>
+
+          <section id="further" className="topic-section">
+            <span className="topic-kicker">07 / NEXT ORBIT</span>
+            <h2>继续扩展这颗知识星</h2>
+            <div className="further-grid">
+              {expansion.further.map(([title, description]) => (
+                <article key={title}><Route size={20} /><div><h3>{title}</h3><p>{description}</p></div></article>
+              ))}
             </div>
           </section>
 
