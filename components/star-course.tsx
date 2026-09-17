@@ -1,10 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import {
   ArrowRight,
   Bookmark,
   BookmarkCheck,
+  BookOpen,
   Check,
   CheckCircle2,
   Clipboard,
@@ -84,7 +86,7 @@ function readProgress(): LearningProgress {
   }
 }
 
-function CodeBlock({ node }: { node: KnowledgeNode }) {
+export function CodeBlock({ node }: { node: KnowledgeNode }) {
   const [copied, setCopied] = useState(false);
   const tokens = useMemo(() => {
     const pattern = /(\/\/.*$|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\b(?:alignas|auto|bool|break|case|catch|char|class|const|constexpr|continue|default|delete|do|double|else|enum|explicit|false|float|for|friend|if|include|inline|int|long|namespace|new|nullptr|operator|override|private|protected|public|return|short|signed|sizeof|static|struct|switch|template|this|thread_local|throw|true|try|typename|union|unsigned|using|virtual|void|volatile|while)\b|\b(?:std|string|vector|array|unique_ptr|shared_ptr|optional|size_t|uint32_t)\b|\b\d+(?:\.\d+)?\b)/gm;
@@ -353,6 +355,11 @@ export function StarCourse() {
                       {favoriteIds.has(selected.id) ? "已收藏" : "收藏"}
                     </Button>
                   </div>
+                  <Link className="deep-dive-link" href={`/topic/${selected.id}`}>
+                    <BookOpen size={17} />
+                    进入完整专题页
+                    <ArrowRight size={15} />
+                  </Link>
                 </SheetHeader>
 
                 <div className="lesson-body">
@@ -362,6 +369,18 @@ export function StarCourse() {
                     <span className="lesson-kicker">CONCEPT</span>
                     <h3>核心概念</h3>
                     {selected.content.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+                    {selected.facts && (
+                      <div className="type-facts" role="table" aria-label="常用基础类型大小">
+                        <div className="type-facts__row type-facts__head" role="row">
+                          <span role="columnheader">类型</span><span role="columnheader">常见 64 位平台</span><span role="columnheader">标准保证</span>
+                        </div>
+                        {selected.facts.map((fact) => (
+                          <div className="type-facts__row" role="row" key={fact.label}>
+                            <code role="cell">{fact.label}</code><strong role="cell">{fact.typical}</strong><span role="cell">{fact.guarantee}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </section>
 
                   <section>

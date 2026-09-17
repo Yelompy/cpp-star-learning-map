@@ -17,6 +17,12 @@ export interface Exercise {
   hint: string;
 }
 
+export interface KnowledgeFact {
+  label: string;
+  typical: string;
+  guarantee: string;
+}
+
 export interface KnowledgeNode {
   id: string;
   stageId: string;
@@ -24,6 +30,7 @@ export interface KnowledgeNode {
   summary: string;
   goal: string;
   content: string[];
+  facts?: KnowledgeFact[];
   prerequisiteIds: string[];
   position: { x: number; y: number };
   example: CodeExample;
@@ -70,10 +77,25 @@ const seeds: TopicSeed[] = [
   },
   {
     id: "variables-types", stageId: "launch", title: "变量与类型", summary: "掌握整数、浮点数、字符、布尔值和常量。",
-    content: ["类型决定一段内存如何被解释、可表达的值以及可执行的操作。优先选择能准确表达业务含义的类型。", "使用 const 表达不可修改的值，使用 auto 让编译器从初始化表达式推导类型，但不要因此隐藏关键语义。"],
-    example: { code: "#include <iostream>\nint main() {\n    const int maxPlayers = 4;\n    double score = 92.5;\n    bool passed = score >= 60.0;\n    std::cout << maxPlayers << ' ' << std::boolalpha << passed;\n}", output: "4 true", explanation: "比较表达式得到 bool，std::boolalpha 让它以文字显示。" },
-    pitfalls: ["把小数保存进 int，导致小数部分被截断。", "使用未初始化的局部变量。"], interviewTip: "理解有符号/无符号混合比较与整数溢出的风险。",
-    exercise: { prompt: "声明温度、城市首字母和是否下雨，并输出它们。", hint: "分别考虑 double、char 与 bool。" }, career: "类型选择会直接影响接口正确性、内存占用和性能。"
+    content: [
+      "类型决定一段内存如何被解释、可表达的值以及可执行的操作。sizeof(T) 返回类型 T 占用的字节数，但 C++ 中一个字节不一定等于 8 位；CHAR_BIT 才表示每字节的位数，现代桌面与移动平台通常为 8。",
+      "标准没有规定 int 必须是 4 字节，只规定最小取值范围和大小顺序：sizeof(char) 恒为 1，且 sizeof(short) ≤ sizeof(int) ≤ sizeof(long) ≤ sizeof(long long)。常见 64 位 Windows 使用 LLP64：int 和 long 为 4 字节、long long 为 8 字节；常见 64 位 Linux/macOS 使用 LP64：int 为 4 字节、long 与 long long 为 8 字节。需要精确位宽时可检查 <cstdint> 中的 std::int32_t 等类型是否可用。",
+      "整数以离散的二进制位表示完整数值。无符号 N 位整数表示 0 到 2^N−1，并按模 2^N 运算；主流机器的有符号整数使用二进制补码，C++20 已将补码写入标准。以常见 32 位 int 为例，它通常表示 −2,147,483,648 到 2,147,483,647。",
+      "浮点数采用另一种编码。常见的 IEEE 754 float 使用 1 位符号、8 位指数和 23 位小数部分，double 通常使用 1+11+52 位。它们保存的是“符号 × 有效数 × 2 的指数”的近似值，因此 0.5 可以精确表示，而十进制 0.1 会变成无限循环的二进制小数，只能取最接近的可表示值。可通过 std::numeric_limits<T>::is_iec559 检查实现是否遵循 IEC 60559 / IEEE 754。",
+      "当浮点数转换为整数时，C++ 规定先丢弃小数部分，结果向 0 截断：3.9 变成 3，−3.9 变成 −3。这不是四舍五入，而是因为目标整数类型只能保存完整的离散值；若截断后的值仍超出目标整数范围，行为未定义。使用 static_cast<int> 可以明确写出转换意图。",
+      "const 表达初始化后不可通过该名称修改的值；auto 让编译器从初始化表达式推导类型。它们能减少错误，但涉及单位、精度、所有权或接口边界时，仍应让关键类型清晰可见。"
+    ],
+    facts: [
+      { label: "char", typical: "1 字节", guarantee: "恒为 1 字节；至少 8 位" },
+      { label: "short", typical: "2 字节", guarantee: "至少 16 位" },
+      { label: "int", typical: "4 字节", guarantee: "至少 16 位" },
+      { label: "long", typical: "Windows 4 / Linux 8 字节", guarantee: "至少 32 位" },
+      { label: "long long", typical: "8 字节", guarantee: "至少 64 位" },
+      { label: "float / double", typical: "4 / 8 字节", guarantee: "常见为 IEEE 754，但应查询实现" }
+    ],
+    example: { code: "#include <climits>\n#include <iostream>\n#include <limits>\n\nint main() {\n    std::cout << \"1 byte = \" << CHAR_BIT << \" bits\\n\";\n    std::cout << \"sizeof(int) = \" << sizeof(int) << \" bytes\\n\";\n    std::cout << \"int range = \"\n              << std::numeric_limits<int>::min() << \" to \"\n              << std::numeric_limits<int>::max() << '\\n';\n\n    double positive = 3.9;\n    double negative = -3.9;\n    std::cout << static_cast<int>(positive) << ' '\n              << static_cast<int>(negative);\n}", output: "常见 64 位电脑上的结果：\n1 byte = 8 bits\nsizeof(int) = 4 bytes\nint range = -2147483648 to 2147483647\n3 -3", explanation: "前两行查询当前编译器的真实数据模型，而不是假定 int 一定为 4 字节；最后一行验证浮点转整数会向 0 截断。不同平台的 sizeof 与范围输出可能不同，这正是应当查询而非死记的原因。" },
+    pitfalls: ["把浮点数转换为 int 时，小数部分会按语言规则向 0 丢弃，并不会四舍五入；超出 int 可表示范围还会导致未定义行为。", "使用未初始化的局部变量会读取不确定值；应在声明时初始化，并开启编译器警告。"], interviewTip: "不要只回答“int 是 4 字节”。先说明标准只保证至少 16 位，再给出 Windows LLP64 与 Linux/macOS LP64 的常见差异，并说明可用 sizeof、CHAR_BIT 和 numeric_limits 查询当前实现。",
+    exercise: { prompt: "写程序输出 char、short、int、long、long long、float、double 的 sizeof、位数与数值范围，再分别转换 3.9、−3.9 和一个超大 double，记录并解释结果。", hint: "使用 CHAR_BIT、sizeof、std::numeric_limits；不要真的执行越界转换，可先用范围判断避免未定义行为。" }, career: "类型大小影响二进制协议、文件格式、内存布局与跨平台接口；浮点误差和越界转换则会直接影响业务正确性。"
   },
   {
     id: "io", stageId: "launch", title: "输入与输出", summary: "使用流读取用户输入，并处理整行文本。",
